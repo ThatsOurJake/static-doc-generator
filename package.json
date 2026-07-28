@@ -11,6 +11,9 @@
     "ts-node": "10.9.2",
     "typescript": "6.0.3"
   },
+  "dependencies": {
+    "marked-highlight": "^2.2.2"
+  },
   "scripts": {
     "build": "ts-node ./generator/index.ts"
   },
