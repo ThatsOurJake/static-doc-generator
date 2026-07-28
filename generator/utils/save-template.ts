@@ -1,7 +1,10 @@
-import ejs from 'ejs';
-import fs from 'fs';
+import fs from "node:fs";
+import ejs from "ejs";
 
-const promisedRenderFile = (fileName: string, data: object): Promise<string> => {
+const promisedRenderFile = (
+  fileName: string,
+  data: object,
+): Promise<string> => {
   return new Promise((resolve, reject) => {
     ejs.renderFile(fileName, data, (err, str) => {
       if (err) {
@@ -13,7 +16,11 @@ const promisedRenderFile = (fileName: string, data: object): Promise<string> => 
   });
 };
 
-const saveTemplate = async (fileName: string, data: object, outputFile: string) => {
+const saveTemplate = async (
+  fileName: string,
+  data: object,
+  outputFile: string,
+) => {
   try {
     const str = await promisedRenderFile(fileName, data);
     fs.writeFileSync(outputFile, str);

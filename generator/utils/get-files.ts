@@ -1,5 +1,5 @@
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 
 import gitIgnore from './gitignore';
 
@@ -16,7 +16,7 @@ const getFiles = (dir: string): File[] => {
     return [];
   }
 
-  return files.filter(x => !gitignore.includes(x.name.toLowerCase())).map(x => ({ name: x.name, path: path.join(dir, x.name )}));
+  return files.filter(x => !gitignore.includes(x.name.toLowerCase())).map(x => ({ name: x.name, path: path.join(dir, x.name) }));
 };
 
 export default getFiles;
