@@ -1,4 +1,4 @@
-type renderTypes = 'image' | 'iframe' | 'json' | 'text' | null;
+type renderTypes = 'image' | 'iframe' | 'json' | 'text' | 'interseq' | null;
 
 const renderDownloadLink = (fileUrl: string, fileName: string) => {
   const container = document.getElementById('container')!;
@@ -16,7 +16,7 @@ const renderDownloadLink = (fileUrl: string, fileName: string) => {
 
 const renderImage = (fileUrl: string, fileName: string) => {
   const container = document.getElementById('container')!;
-  
+
   renderDownloadLink(fileUrl, fileName);
 
   const image = document.createElement('img');
@@ -26,7 +26,7 @@ const renderImage = (fileUrl: string, fileName: string) => {
   container.appendChild(image);
 };
 
-const renderJSON = (fileUrl: string, fileName: string) => {
+const renderJSON = async (fileUrl: string, fileName: string) => {
   const container = document.getElementById('container')!;
 
   const KeyValueEle = (key: string, value: string) => {
@@ -70,16 +70,22 @@ const renderJSON = (fileUrl: string, fileName: string) => {
     return ele;
   };
 
-  const render = (parentRoot: HTMLElement, key: string, value: {[key: string]: string}[] | {[key: string]: string} | string) => {
+  const render = (parentRoot: HTMLElement, key: string, value: { [key: string]: string }[] | { [key: string]: string } | string) => {
     const item = document.createElement('li');
     const root = document.createElement('ul');
     root.classList.add('json-nested-item');
-    
+
     if (Array.isArray(value)) {
       item.appendChild(DataEle(key, value.length, true));
 
       for (let i = 0; i < value.length; i++) {
-        render(root, i.toString(), value[i]);
+        const nestedValue = value[i];
+
+        if (nestedValue === undefined) {
+          continue;
+        }
+
+        render(root, i.toString(), nestedValue);
       }
 
       item.appendChild(root);
@@ -87,12 +93,16 @@ const renderJSON = (fileUrl: string, fileName: string) => {
       item.appendChild(DataEle(key, Object.keys(value).length, false));
       const keys = Object.keys(value);
 
-      for (let i = 0; i < keys.length; i++) {
-        const k = keys[i];
+      for (const k of keys) {
         const v = value[k];
+
+        if (v === undefined) {
+          continue;
+        }
+
         render(root, k, v);
       }
-      
+
       item.appendChild(root);
     } else {
       item.appendChild(KeyValueEle(key, value));
@@ -102,50 +112,53 @@ const renderJSON = (fileUrl: string, fileName: string) => {
     return parentRoot;
   }
 
-  fetch(fileUrl, {
-    method: 'GET',
-  }).then(x => x.json())
-  .catch(x => {
+  let data: unknown;
+
+  try {
+    const response = await fetch(fileUrl, {
+      method: 'GET',
+    });
+    data = await response.json();
+  } catch (x) {
     console.error(x);
     return renderUnknown(fileUrl, fileName);
-  })
-  .then(data => {
-    if (!data) {
-      return;
-    }
+  }
 
-    const root = document.createElement('ul');
-    root.classList.add('json-viewer');
+  if (!data) {
+    return;
+  }
 
-    const controls = document.createElement('div');
-    controls.classList.add('controls');
+  const root = document.createElement('ul');
+  root.classList.add('json-viewer');
 
-    const showAllEle = document.createElement('p');
-    showAllEle.innerText = 'Show all properties';
-    showAllEle.addEventListener('click', () => root.querySelectorAll('.json-nested-item-selector').forEach(x => {
-      x.classList.add('json-nested-item-showing');
-      x.parentNode?.querySelectorAll(':scope > .json-nested-item').forEach(x => x.classList.add('json-nested-item-show'));
-    }));
-    controls.append(showAllEle);
+  const controls = document.createElement('div');
+  controls.classList.add('controls');
 
-    const hideAllEle = document.createElement('p');
-    hideAllEle.innerText = 'Hide all properties';
-    hideAllEle.addEventListener('click', () => root.querySelectorAll('.json-nested-item-selector').forEach(x => {
-      x.classList.remove('json-nested-item-showing');
-      x.parentNode?.querySelectorAll(':scope > .json-nested-item').forEach(x => x.classList.remove('json-nested-item-show'));
-    }));
-    controls.append(hideAllEle);
+  const showAllEle = document.createElement('p');
+  showAllEle.innerText = 'Show all properties';
+  showAllEle.addEventListener('click', () => root.querySelectorAll('.json-nested-item-selector').forEach(x => {
+    x.classList.add('json-nested-item-showing');
+    x.parentNode?.querySelectorAll(':scope > .json-nested-item').forEach(x => x.classList.add('json-nested-item-show'));
+  }));
+  controls.append(showAllEle);
 
-    renderDownloadLink(fileUrl, fileName);
+  const hideAllEle = document.createElement('p');
+  hideAllEle.innerText = 'Hide all properties';
+  hideAllEle.addEventListener('click', () => root.querySelectorAll('.json-nested-item-selector').forEach(x => {
+    x.classList.remove('json-nested-item-showing');
+    x.parentNode?.querySelectorAll(':scope > .json-nested-item').forEach(x => x.classList.remove('json-nested-item-show'));
+  }));
+  controls.append(hideAllEle);
 
-    container.append(
-      controls,
-      render(
-        root,
-        Array.isArray(data) ? 'array' : 'object',
-        data)
-      );
-  });
+  renderDownloadLink(fileUrl, fileName);
+
+  container.append(
+    controls,
+    render(
+      root,
+      Array.isArray(data) ? 'array' : 'object',
+      data as { [key: string]: string }[] | { [key: string]: string } | string)
+  );
 };
 
 const renderIFrame = (fileUrl: string, fileName: string) => {
@@ -175,37 +188,64 @@ const renderUnknown = (fileUrl: string, fileName: string) => {
   container.appendChild(paragraph);
 };
 
-const renderText = (fileUrl: string, fileName: string) => {
+const renderText = async (fileUrl: string, fileName: string) => {
   const container = document.getElementById('container')!;
 
-  fetch(fileUrl, {
-    method: 'GET',
-  }).then(x => x.text())
-  .catch(x => {
+  let data: string;
+
+  try {
+    const response = await fetch(fileUrl, {
+      method: 'GET',
+    });
+    data = await response.text();
+  } catch (x) {
     console.error(x);
     return renderUnknown(fileUrl, fileName);
-  })
-  .then(data => {
-    if (!data) {
-      return;
-    }
+  }
 
-    renderDownloadLink(fileUrl, fileName);
+  if (!data) {
+    return;
+  }
 
-    const root = document.createElement('div');
-    const pre = document.createElement('pre');
-    const code = document.createElement('code');
-    code.innerText = data;
-    pre.appendChild(code);
-    root.appendChild(pre);
-    container.appendChild(root);
-  });
+  renderDownloadLink(fileUrl, fileName);
+
+  const root = document.createElement('div');
+  const pre = document.createElement('pre');
+  const code = document.createElement('code');
+  code.innerText = data;
+  pre.appendChild(code);
+  root.appendChild(pre);
+  container.appendChild(root);
+};
+
+const renderInterseq = async (fileUrl: string, fileName: string) => {
+  const container = document.getElementById('container');
+
+  renderDownloadLink(fileUrl, fileName);
+
+  const interseqContainer = document.createElement('inter-seq');
+
+  const interseqScript = document.createElement('script');
+  interseqScript.type = 'text/x-interseq';
+
+  try {
+    const response = await fetch(fileUrl, {
+      method: 'GET',
+    });
+    const content = await response.text();
+    interseqScript.innerHTML = content;
+    interseqContainer.appendChild(interseqScript);
+    container?.appendChild(interseqContainer);
+  } catch (x) {
+    console.error(x);
+    renderUnknown(fileUrl, fileName);
+  }
 };
 
 const determineType = (fileName: string): renderTypes => {
   const fileExt = fileName.split('.').pop();
 
-  switch(fileExt) {
+  switch (fileExt) {
     case 'png':
     case 'jpg':
     case 'jpeg':
@@ -219,6 +259,8 @@ const determineType = (fileName: string): renderTypes => {
     case 'txt':
     case 'md':
       return 'text';
+    case 'iseq':
+      return 'interseq';
     default:
       return null;
   }
@@ -231,7 +273,7 @@ const render = () => {
   if (!file) {
     return;
   }
-  
+
   const fileName = file.split('/').pop();
 
   if (!fileName) {
@@ -241,7 +283,7 @@ const render = () => {
   window.document.title = `File Viewer - ${fileName}`;
   const fileType = determineType(fileName);
 
-  switch(fileType) {
+  switch (fileType) {
     case 'image':
       return renderImage(file, fileName);
     case 'iframe':
@@ -250,6 +292,8 @@ const render = () => {
       return renderJSON(file, fileName);
     case 'text':
       return renderText(file, fileName);
+    case 'interseq':
+      return renderInterseq(file, fileName);
     default:
       return renderUnknown(file, fileName);
   }
