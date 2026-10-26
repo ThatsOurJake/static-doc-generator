@@ -1,23 +1,7 @@
 type renderTypes = 'image' | 'iframe' | 'json' | 'text' | 'interseq' | null;
 
-const renderDownloadLink = (fileUrl: string, fileName: string) => {
-  const container = document.getElementById('container')!;
-  const paragraph = document.createElement('p');
-  paragraph.classList.add('u-text-center', 'download-link');
-
-  const downloadLink = document.createElement('a');
-  downloadLink.href = fileUrl;
-  downloadLink.download = fileName;
-  downloadLink.innerText = `Download '${fileName}'`;
-
-  paragraph.append(downloadLink);
-  container.appendChild(paragraph);
-};
-
 const renderImage = (fileUrl: string, fileName: string) => {
   const container = document.getElementById('container')!;
-
-  renderDownloadLink(fileUrl, fileName);
 
   const image = document.createElement('img');
   image.src = fileUrl;
@@ -150,8 +134,6 @@ const renderJSON = async (fileUrl: string, fileName: string) => {
   }));
   controls.append(hideAllEle);
 
-  renderDownloadLink(fileUrl, fileName);
-
   container.append(
     controls,
     render(
@@ -163,8 +145,6 @@ const renderJSON = async (fileUrl: string, fileName: string) => {
 
 const renderIFrame = (fileUrl: string, fileName: string) => {
   const container = document.getElementById('container')!;
-
-  renderDownloadLink(fileUrl, fileName);
 
   const iframe = document.createElement('iframe');
   iframe.src = fileUrl;
@@ -207,8 +187,6 @@ const renderText = async (fileUrl: string, fileName: string) => {
     return;
   }
 
-  renderDownloadLink(fileUrl, fileName);
-
   const root = document.createElement('div');
   const pre = document.createElement('pre');
   const code = document.createElement('code');
@@ -220,8 +198,6 @@ const renderText = async (fileUrl: string, fileName: string) => {
 
 const renderInterseq = async (fileUrl: string, fileName: string) => {
   const container = document.getElementById('container');
-
-  renderDownloadLink(fileUrl, fileName);
 
   const interseqContainer = document.createElement('inter-seq');
 

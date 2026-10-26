@@ -2,10 +2,11 @@ import fs from "node:fs";
 import path from "node:path";
 
 import compile from "./compiler";
+import buildSite from "./utils/build-site";
 import getDirs, { type Directory } from "./utils/get-dirs";
 import getNotifications from "./utils/get-notifications";
-import parseDetailsFile from "./utils/parse-details-file";
 import renderPage from "./utils/render-page";
+import renderTree from "./utils/render-tree";
 import saveTemplate from "./utils/save-template";
 
 (async () => {
@@ -27,6 +28,8 @@ import saveTemplate from "./utils/save-template";
     a.name.localeCompare(b.name),
   );
 
+  const site = buildSite(directories);
+
   // Generate each page
   const generatePages = async (dirs: Directory[]) => {
     for (let i = 0; i < dirs.length; i++) {
@@ -36,7 +39,7 @@ import saveTemplate from "./utils/save-template";
         continue;
       }
 
-      await renderPage(directory, distDir, templatesDir);
+      await renderPage(directory, distDir, templatesDir, site);
 
       if (directory.children.length > 0) {
         await generatePages(directory.children);
@@ -52,11 +55,8 @@ import saveTemplate from "./utils/save-template";
     path.join(templatesDir, "main.ejs"),
     {
       title: "Jakes Documentation",
-      links: directories.map((x) => {
-        const dirDetails = parseDetailsFile(x.parent);
-
-        return { name: dirDetails?.name || x.name, path: x.relativePath };
-      }),
+      navTree: renderTree(site.tree, null),
+      sections: site.tree,
       notifications: homepageNotifications,
     },
     path.join(distDir, "index.html"),
@@ -68,6 +68,7 @@ import saveTemplate from "./utils/save-template";
     path.join(templatesDir, "viewer.ejs"),
     {
       title: "File Viewer",
+      navTree: renderTree(site.tree, null),
     },
     path.join(distDir, "viewer", "index.html"),
   );
@@ -77,6 +78,12 @@ import saveTemplate from "./utils/save-template";
     recursive: true,
     force: true,
   });
+
+  console.log("Writing Search Index");
+  fs.writeFileSync(
+    path.join(distDir, "assets", "search-index.json"),
+    JSON.stringify(site.search),
+  );
 
   console.log("Compiling Scripts");
   compile(clientScriptDir, path.join(distDir, "assets"));

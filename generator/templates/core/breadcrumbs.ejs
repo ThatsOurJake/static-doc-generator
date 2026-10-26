@@ -1,0 +1,9 @@
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <a href="/">Home</a>
+  <% crumbs.forEach(crumb => { %>
+    <span class="breadcrumb-separator">/</span>
+    <a href="<%= crumb.path %>/"><%= crumb.name %></a>
+  <% }); %>
+  <span class="breadcrumb-separator">/</span>
+  <span class="breadcrumb-current" aria-current="page"><%= current %></span>
+</nav>

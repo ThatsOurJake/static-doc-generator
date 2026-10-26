@@ -1,10 +1,21 @@
+<!DOCTYPE html>
 <html lang="en">
   <%- include('core/head', { title }) %>
-  <body>
+  <body data-page="viewer">
     <%- include('core/header') %>
-    <div class="viewer-wrapper">
-      <p class="header"><b>File Viewer</b></p>
-      <div id="container"></div>
+    <div class="app-shell">
+      <%- include('core/nav-bar') %>
+      <main class="content viewer-main">
+        <nav class="breadcrumbs" id="viewer-crumbs" aria-label="Breadcrumb"></nav>
+        <div class="viewer-toolbar">
+          <h1 class="viewer-title" id="viewer-title">File Viewer</h1>
+          <div class="viewer-actions">
+            <a class="button" id="viewer-back" href="/" hidden>← Back to folder</a>
+            <a class="button button-primary" id="viewer-download" hidden>⬇ Download</a>
+          </div>
+        </div>
+        <div id="container"></div>
+      </main>
     </div>
   </body>
   <script src="/assets/viewer.js"></script>

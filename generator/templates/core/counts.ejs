@@ -1,0 +1,5 @@
+<%
+  const parts = [];
+  if (node.children.length > 0) parts.push(node.children.length + (node.children.length === 1 ? ' folder' : ' folders'));
+  if (node.docCount > 0) parts.push(node.docCount + (node.docCount === 1 ? ' document' : ' documents'));
+%><%= parts.length ? parts.join(' · ') : 'Empty' %>

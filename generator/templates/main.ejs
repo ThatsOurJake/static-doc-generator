@@ -1,18 +1,34 @@
+<!DOCTYPE html>
 <html lang="en">
   <%- include('core/head', { title }) %>
-  <body>
+  <body data-page="home">
     <%- include('core/header') %>
-    <div class="wrapper">
-      <%- include('core/nav-bar', { showHome: false }) %>
-      <div class="content">
-        <img src="https://sdk.bitmoji.com/render/panel/a7161b2e-c41a-4b71-a610-4dbb0184c2be-dae924a3-30cf-4be0-898e-39939da96209-v1.png?transparent=1&palette=1" class="u-block-center"></img>
-        <p>Welcome to Jakes Documentation - This static site contains all the documentation that Jake has saved on their machine for various different pieces of work. Certain documents can be viewed within the site or if not supported be downloaded externally.</p>
-        <% if (notifications.length > 0) { %>
-          <% notifications.forEach(notification => { %>
-            <%- include('core/notification', notification) %>
+    <div class="app-shell">
+      <%- include('core/nav-bar') %>
+      <main class="content">
+        <section class="hero">
+          <img src="https://sdk.bitmoji.com/render/panel/a7161b2e-c41a-4b71-a610-4dbb0184c2be-dae924a3-30cf-4be0-898e-39939da96209-v1.png?transparent=1&palette=1" class="hero-image" alt="">
+          <div>
+            <h1 class="page-title">Welcome to Jakes Documentation</h1>
+            <p class="page-description">This static site contains all the documentation that Jake has saved on their machine for various different pieces of work. Certain documents can be viewed within the site or if not supported be downloaded externally.</p>
+          </div>
+        </section>
+        <% notifications.forEach(notification => { %>
+          <%- include('core/notification', notification) %>
+        <% }); %>
+        <h2 class="section-title">Sections</h2>
+        <div class="section-grid">
+          <% sections.forEach(section => { %>
+            <a class="section-tile" href="<%= section.path %>/">
+              <span class="section-tile-name">📁 <%= section.name %></span>
+              <% if (section.description) { %>
+                <span class="section-tile-description"><%= section.description %></span>
+              <% } %>
+              <span class="section-tile-meta"><%- include('core/counts', { node: section }) %></span>
+            </a>
           <% }); %>
-        <% } %>
-      </div>
+        </div>
+      </main>
     </div>
   </body>
 </html>

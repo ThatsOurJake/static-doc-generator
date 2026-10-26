@@ -3,7 +3,8 @@ import path from 'node:path';
 
 interface HomepageNotification {
   title: string;
-  details: string;
+  description: string;
+  date: string;
 }
 
 const getNotifications = (docsDir: string): HomepageNotification[] => {

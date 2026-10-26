@@ -1,19 +1,43 @@
+<!DOCTYPE html>
 <html lang="en">
   <%- include('core/head', { title: (details && details.name) || title }) %>
-  <body>
+  <body data-page="folder">
     <%- include('core/header') %>
-    <div class="wrapper">
-      <%- include('core/nav-bar', { showHome: true }) %>
-      <div class="content">
-        <div class="page-header">
-          <% if (details) { %>
-            <p class="page-title"><%= details.name %></p>
+    <div class="app-shell">
+      <%- include('core/nav-bar') %>
+      <main class="content">
+        <%- include('core/breadcrumbs', { current: title }) %>
+        <header class="page-header">
+          <h1 class="page-title"><%= title %></h1>
+          <% if (details && details.description) { %>
             <p class="page-description"><%= details.description %></p>
-          <% } else { %>
-            <p class="page-title"><%= title %></p>
           <% } %>
-        </div>
+        </header>
+
+        <% if (folders.length > 0) { %>
+          <h2 class="section-title">Folders <span class="section-count"><%= folders.length %></span></h2>
+          <table class="file-table folder-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Contents</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% folders.forEach(folder => { %>
+                <tr class="file-row">
+                  <td class="file-title"><a href="<%= folder.path %>/">📁 <%= folder.name %></a></td>
+                  <td class="folder-description"><%= folder.description || '' %></td>
+                  <td class="folder-meta"><%- include('core/counts', { node: folder }) %></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        <% } %>
+
         <% if (files.length > 0) { %>
+          <h2 class="section-title">Documents <span class="section-count"><%= files.length %></span></h2>
           <% const labels = [...new Set(files.flatMap(group => group.formats.map(format => format.label)))].sort(); %>
           <div class="file-filter" id="file-filter">
             <input type="search" class="file-filter-input" id="file-filter-input" placeholder="Filter <%= files.length %> documents..." aria-label="Filter documents" autocomplete="off">
@@ -54,7 +78,11 @@
           <p class="file-empty" id="file-empty" hidden>No documents match your filter.</p>
           <script src="/assets/file-filter.js"></script>
         <% } %>
-      </div>
+
+        <% if (folders.length === 0 && files.length === 0) { %>
+          <p class="file-empty">This folder is empty.</p>
+        <% } %>
+      </main>
     </div>
   </body>
 </html>

@@ -1,11 +1,8 @@
-<div class="nav-bar">
-  <p class="nav-bar-header">Documentation</p>
-  <ul>
-    <% if (showHome) { %>
-      <li><a href="/"><p class="nav-bar-home">🏠 Back to Home</p></a></li>
-    <% } %>
-    <% links.forEach(link => { %>
-      <li><a href="<%- link.path %>"><p><%- link.name %></p></a></li>
-    <% }); %>
-  </ul>
-</div>
+<aside class="sidebar" id="sidebar">
+  <nav aria-label="Documentation">
+    <a class="sidebar-home" href="/">🏠 Home</a>
+    <p class="sidebar-heading">Browse</p>
+    <div class="tree" id="tree"><%- navTree %></div>
+  </nav>
+</aside>
+<div class="nav-backdrop" id="nav-backdrop"></div>
