@@ -3,6 +3,7 @@ import path from "node:path";
 
 import type { Directory } from "./get-dirs";
 import getFiles from "./get-files";
+import groupFiles, { type FileFormat } from "./group-files";
 import parseDetailsFile from "./parse-details-file";
 import saveTemplate from "./save-template";
 
@@ -37,10 +38,18 @@ const renderPage = async (
         };
       }),
       details,
-      files: files.map((x) => ({
-        name: x.name,
-        path: path.join(directory.relativePath, x.name),
-      })),
+      files: groupFiles(files).map((group) => {
+        const withViewPath = (format: FileFormat) => ({
+          ...format,
+          path: path.join(directory.relativePath, format.name),
+        });
+
+        return {
+          ...group,
+          formats: group.formats.map(withViewPath),
+          primary: withViewPath(group.primary),
+        };
+      }),
     },
     path.join(outputDir, "index.html"),
   );

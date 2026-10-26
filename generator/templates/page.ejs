@@ -14,13 +14,46 @@
           <% } %>
         </div>
         <% if (files.length > 0) { %>
-          <p><b>Files:</b></p>
+          <% const labels = [...new Set(files.flatMap(group => group.formats.map(format => format.label)))].sort(); %>
+          <div class="file-filter" id="file-filter">
+            <input type="search" class="file-filter-input" id="file-filter-input" placeholder="Filter <%= files.length %> documents..." aria-label="Filter documents" autocomplete="off">
+            <% if (labels.length > 1) { %>
+              <div class="file-filter-chips" id="file-filter-chips">
+                <button type="button" class="file-chip file-chip-active" data-format="">All</button>
+                <% labels.forEach(label => { %>
+                  <button type="button" class="file-chip" data-format="<%= label %>"><%= label %></button>
+                <% }); %>
+              </div>
+            <% } %>
+          </div>
+          <table class="file-table">
+            <thead>
+              <tr>
+                <th>Document</th>
+                <th>Formats</th>
+              </tr>
+            </thead>
+            <tbody id="file-table-body">
+              <% files.forEach(group => { %>
+                <tr class="file-row" data-search="<%= (group.title + ' ' + group.formats.map(format => format.name).join(' ')).toLowerCase() %>" data-formats="<%= group.formats.map(format => format.label).join(' ') %>">
+                  <td class="file-title">
+                    <a href="/viewer?file=<%= encodeURIComponent(group.primary.path) %>"><%= group.title %></a>
+                    <% if (group.title !== group.key) { %>
+                      <span class="file-name"><%= group.key %></span>
+                    <% } %>
+                  </td>
+                  <td class="file-formats">
+                    <% group.formats.forEach(format => { %>
+                      <a class="file-badge file-badge-<%= format.ext.replace(/[^a-z0-9]/g, '') %>" href="/viewer?file=<%= encodeURIComponent(format.path) %>" title="<%= format.name %>"><%= format.label %></a>
+                    <% }); %>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+          <p class="file-empty" id="file-empty" hidden>No documents match your filter.</p>
+          <script src="/assets/file-filter.js"></script>
         <% } %>
-        <ul class="file-links">
-          <% files.forEach(file => { %>
-            <li><a href="/viewer?file=<%= encodeURIComponent(file.path) %>"><p><%- file.name %></p></a></li>
-          <% }); %>
-        </ul>
       </div>
     </div>
   </body>
