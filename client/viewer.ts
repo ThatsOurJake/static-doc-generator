@@ -200,6 +200,7 @@ const renderInterseq = async (fileUrl: string, fileName: string) => {
   const container = document.getElementById('container');
 
   const interseqContainer = document.createElement('inter-seq');
+  interseqContainer.setAttribute('show-download', 'true');
 
   const interseqScript = document.createElement('script');
   interseqScript.type = 'text/x-interseq';
