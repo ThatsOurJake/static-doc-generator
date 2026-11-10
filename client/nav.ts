@@ -69,6 +69,24 @@
     return;
   }
 
+  const immersiveLink = document.getElementById("viewer-immersive") as HTMLAnchorElement | null;
+  if (immersiveLink) {
+    const url = new URL(window.location.href);
+    const isImmersive = url.searchParams.get("immersive") === "true";
+    document.body.classList.toggle("viewer-immersive", isImmersive);
+
+    if (isImmersive) {
+      url.searchParams.delete("immersive");
+      immersiveLink.textContent = "Exit immersive view";
+    } else {
+      url.searchParams.set("immersive", "true");
+      immersiveLink.textContent = "Immersive view";
+    }
+
+    immersiveLink.href = `${url.pathname}${url.search}${url.hash}`;
+    immersiveLink.hidden = false;
+  }
+
   const segments = file.split("/").filter(Boolean);
   const fileName = segments[segments.length - 1] ?? file;
   const dirPath = `/${segments.slice(0, -1).join("/")}`;

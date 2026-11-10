@@ -502,6 +502,46 @@ button {
   max-width: none;
 }
 
+.viewer-immersive .app-header,
+.viewer-immersive .sidebar,
+.viewer-immersive .nav-backdrop,
+.viewer-immersive #viewer-crumbs {
+  display: none;
+}
+
+.viewer-immersive .app-shell {
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.viewer-immersive .viewer-main {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 8px 16px;
+}
+
+.viewer-immersive .viewer-toolbar {
+  flex-shrink: 0;
+  margin-bottom: 8px;
+}
+
+.viewer-immersive #container {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.viewer-immersive #container img {
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.viewer-immersive #container iframe {
+  height: 100%;
+  min-height: 0;
+}
+
 #container img {
   display: block;
   max-width: 100%;
