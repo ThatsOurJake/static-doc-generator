@@ -199,23 +199,27 @@ const renderText = async (fileUrl: string, fileName: string) => {
 const renderInterseq = async (fileUrl: string, fileName: string) => {
   const container = document.getElementById('container');
 
-  const interseqContainer = document.createElement('inter-seq');
-  interseqContainer.setAttribute('show-download', 'true');
+  if (container) {
+    container.style.height = "620px";
 
-  const interseqScript = document.createElement('script');
-  interseqScript.type = 'text/x-interseq';
+    const interseqContainer = document.createElement('inter-seq');
+    interseqContainer.setAttribute('show-download', 'true');
 
-  try {
-    const response = await fetch(fileUrl, {
-      method: 'GET',
-    });
-    const content = await response.text();
-    interseqScript.innerHTML = content;
-    interseqContainer.appendChild(interseqScript);
-    container?.appendChild(interseqContainer);
-  } catch (x) {
-    console.error(x);
-    renderUnknown(fileUrl, fileName);
+    const interseqScript = document.createElement('script');
+    interseqScript.type = 'text/x-interseq';
+
+    try {
+      const response = await fetch(fileUrl, {
+        method: 'GET',
+      });
+      const content = await response.text();
+      interseqScript.innerHTML = content;
+      interseqContainer.appendChild(interseqScript);
+      container.appendChild(interseqContainer);
+    } catch (x) {
+      console.error(x);
+      renderUnknown(fileUrl, fileName);
+    }
   }
 };
 
