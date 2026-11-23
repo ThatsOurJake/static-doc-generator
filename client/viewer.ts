@@ -1,4 +1,8 @@
-type renderTypes = 'image' | 'iframe' | 'json' | 'text' | 'interseq' | null;
+type renderTypes = 'image' | 'iframe' | 'json' | 'text' | 'interseq' | 'video' | null;
+
+const extMapping: Record<string, string> = {
+  'mp4': 'video/mp4',
+};
 
 const renderImage = (fileUrl: string, fileName: string) => {
   const container = document.getElementById('container')!;
@@ -199,28 +203,60 @@ const renderText = async (fileUrl: string, fileName: string) => {
 const renderInterseq = async (fileUrl: string, fileName: string) => {
   const container = document.getElementById('container');
 
-  if (container) {
-    container.style.height = "620px";
-
-    const interseqContainer = document.createElement('inter-seq');
-    interseqContainer.setAttribute('show-download', 'true');
-
-    const interseqScript = document.createElement('script');
-    interseqScript.type = 'text/x-interseq';
-
-    try {
-      const response = await fetch(fileUrl, {
-        method: 'GET',
-      });
-      const content = await response.text();
-      interseqScript.innerHTML = content;
-      interseqContainer.appendChild(interseqScript);
-      container.appendChild(interseqContainer);
-    } catch (x) {
-      console.error(x);
-      renderUnknown(fileUrl, fileName);
-    }
+  if (!container) {
+    return null;
   }
+
+  container.style.height = "620px";
+
+  const interseqContainer = document.createElement('inter-seq');
+  interseqContainer.setAttribute('show-download', 'true');
+
+  const interseqScript = document.createElement('script');
+  interseqScript.type = 'text/x-interseq';
+
+  try {
+    const response = await fetch(fileUrl, {
+      method: 'GET',
+    });
+    const content = await response.text();
+    interseqScript.innerHTML = content;
+    interseqContainer.appendChild(interseqScript);
+    container.appendChild(interseqContainer);
+  } catch (x) {
+    console.error(x);
+    renderUnknown(fileUrl, fileName);
+  }
+};
+
+const renderVideo = async (fileUrl: string, fileName: string) => {
+  const container = document.getElementById('container');
+
+  const ext = fileName.split('.').pop();
+
+  if (!container || !ext) {
+    return renderUnknown(fileUrl, fileName);
+  }
+
+
+  const videoType = extMapping[ext];
+
+  if (!videoType) {
+    return renderUnknown(fileUrl, fileName);
+  }
+
+  const video = document.createElement('video');
+  const source = document.createElement('source');
+  source.src = fileUrl;
+  source.type = extMapping[ext];
+
+  video.style.width = "75%";
+  video.style.margin = "0 auto";
+  video.style.display = "block";
+  video.controls = true;
+
+  video.appendChild(source);
+  container.appendChild(video);
 };
 
 const determineType = (fileName: string): renderTypes => {
@@ -242,6 +278,8 @@ const determineType = (fileName: string): renderTypes => {
       return 'text';
     case 'iseq':
       return 'interseq';
+    case 'mp4':
+      return 'video';
     default:
       return null;
   }
@@ -275,6 +313,8 @@ const render = () => {
       return renderText(file, fileName);
     case 'interseq':
       return renderInterseq(file, fileName);
+    case 'video':
+      return renderVideo(file, fileName);
     default:
       return renderUnknown(file, fileName);
   }
